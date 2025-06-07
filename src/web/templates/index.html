@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Equity Market Prediction</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            padding: 20px;
+            background-color: #f8f9fa;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .card {
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .prediction-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #28a745;
+        }
+        .metrics-card {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="text-center mb-4">Equity Market Prediction</h1>
+        
+        <!-- Equity Dropdown -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <label for="equity-select" class="form-label">Select Equity:</label>
+                <select id="equity-select" class="form-select" style="max-width: 300px;">
+                    <option value="AAPL">Apple (AAPL)</option>
+                    <option value="MSFT">Microsoft (MSFT)</option>
+                    <option value="GOOGL">Alphabet (GOOGL)</option>
+                    <option value="TSLA">Tesla (TSLA)</option>
+                    <option value="AMZN">Amazon (AMZN)</option>
+                    <option value="META">Meta (META)</option>
+                    <option value="NVDA">NVIDIA (NVDA)</option>
+                    <option value="JPM">JPMorgan Chase (JPM)</option>
+                    <option value="NFLX">Netflix (NFLX)</option>
+                    <option value="DIS">Disney (DIS)</option>
+                </select>
+            </div>
+        </div>
+        
+        <div class="row">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Latest Prediction</h5>
+                        <div id="prediction-container">
+                            <p>Loading prediction...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Model Performance</h5>
+                        <div id="metrics-container">
+                            <!-- Metrics will be loaded dynamically by the dashboard or API -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="row mt-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Interactive Dashboard</h5>
+                        <p class="text-muted">For detailed analysis and visualizations, visit the <a href="/dashboard/">dashboard</a>.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function updatePrediction() {
+            const equity = document.getElementById('equity-select').value;
+            fetch(`/api/predict?symbol=${equity}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.error) {
+                        document.getElementById('prediction-container').innerHTML = 
+                            `<p class="text-danger">${data.error}</p>`;
+                        return;
+                    }
+                    
+                    const predictionHtml = `
+                        <p>Current Price: $${data.current_price.toFixed(2)}</p>
+                        <p>Predicted Return: <span class="prediction-value">${(data.predicted_return * 100).toFixed(2)}%</span></p>
+                        <p class="text-muted">Last updated: ${data.timestamp}</p>
+                    `;
+                    document.getElementById('prediction-container').innerHTML = predictionHtml;
+                })
+                .catch(error => {
+                    document.getElementById('prediction-container').innerHTML = 
+                        `<p class="text-danger">Error fetching prediction: ${error}</p>`;
+                });
+        }
+
+        // Update prediction on dropdown change
+        document.getElementById('equity-select').addEventListener('change', updatePrediction);
+
+        // Initial prediction and interval
+        updatePrediction();
+        setInterval(updatePrediction, 5 * 60 * 1000);
+    </script>
+</body>
+</html> 
